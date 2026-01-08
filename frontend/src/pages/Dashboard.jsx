@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 import {
     Rocket, Settings, LogOut, Smartphone, QrCode, Save,
     CheckCircle2, RefreshCw, Users, Zap, List, MessageSquare,
-    Crown, ShieldCheck, Check, Clock, Play, Pause, Moon
+    Crown, ShieldCheck, Check, Clock, Play, Pause, Moon, ShoppingBag
 } from 'lucide-react';
 
 const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
@@ -17,7 +17,7 @@ const socket = io(SOCKET_URL, {
 });
 
 /**
- * Dashboard Central do SaaS ShopeeBot
+ * Dashboard Central do ShopeeFlow
  * Gerencia conexão, configuração de mensagens, grupos e planos.
  */
 export default function Dashboard({ user, onLogout }) {
@@ -157,9 +157,12 @@ export default function Dashboard({ user, onLogout }) {
         <div className="flex min-h-screen bg-[#f8fafc]">
             {/* SIDEBAR PREMIUM */}
             <aside className="w-64 bg-white border-r border-slate-200 flex flex-col sticky top-0 h-screen z-10">
-                <div className="p-8 border-b border-slate-100 mb-6">
-                    <h1 className="text-2xl font-black flex items-center gap-2 text-[#ee4d2d]">
-                        <Zap size={24} fill="#ee4d2d" /> ShopeeBot
+                <div className="p-8 border-b border-slate-100 mb-6 text-center">
+                    <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#ee4d2d] shadow-sm">
+                        <ShoppingBag size={40} />
+                    </div>
+                    <h1 className="text-2xl font-black text-slate-800 tracking-tighter">
+                        Shopee<span className="text-[#ee4d2d]">Flow</span>
                     </h1>
                     <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-orange-50 text-[#ee4d2d] rounded-md text-[10px] font-bold uppercase tracking-wider border border-orange-100">
                         SaaS Edition

@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { LayoutDashboard, Lock, Mail, ArrowRight, Loader2, ShoppingBag } from 'lucide-react';
 
 // URL do Backend
 const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
@@ -87,9 +87,9 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
             <div className="glass-panel w-full max-w-md p-8 rounded-2xl shadow-2xl z-10 relative border-t border-white/10">
                 <div className="text-center mb-8">
                     <div className="inline-flex p-4 rounded-xl bg-orange-500 text-white shadow-lg mb-4 transform hover:scale-110 transition-transform">
-                        <LayoutDashboard size={32} />
+                        <ShoppingBag size={32} />
                     </div>
-                    <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">ShopeeBot <span className="text-orange-500">SaaS</span></h1>
+                    <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Shopee<span className="text-orange-500">Flow</span></h1>
                     <p className="text-slate-400 font-light">
                         {isRegister ? 'Comece a lucrar no piloto automático.' : 'Bem-vindo de volta, afiliado.'}
                     </p>
