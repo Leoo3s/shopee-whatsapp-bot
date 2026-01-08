@@ -1,0 +1,147 @@
+import { useState, Suspense, lazy } from 'react';
+import axios from 'axios';
+import { LayoutDashboard, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
+
+// URL do Backend
+const API_URL = 'http://localhost:3001/api';
+
+// Carregamento Preguiçoso do Dashboard
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+
+export default function App() {
+    // Inicializa o estado buscando do localStorage para manter a sessão ao atualizar
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('shopee_bot_user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+    const [isRegister, setIsRegister] = useState(false);
+
+    const handleLogin = (userData) => {
+        localStorage.setItem('shopee_bot_user', JSON.stringify(userData));
+        setUser(userData);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('shopee_bot_user');
+        setUser(null);
+    };
+
+    // Se logado, mostra Dashboard com Loading State
+    if (user) {
+        return (
+            <Suspense fallback={
+                <div className="h-screen w-full flex items-center justify-center bg-slate-900 text-orange-500">
+                    <Loader2 size={48} className="animate-spin" />
+                    <span className="ml-3 text-xl font-bold">Carregando Painel...</span>
+                </div>
+            }>
+                <Dashboard user={user} onLogout={handleLogout} />
+            </Suspense>
+        );
+    }
+
+    // Se não, mostra Login
+    return <LoginScreen onLogin={handleLogin} isRegister={isRegister} setIsRegister={setIsRegister} />;
+}
+
+// --- TELA DE LOGIN REFEITA (DESIGN PREMIUM) ---
+function LoginScreen({ onLogin, isRegister, setIsRegister }) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            const endpoint = isRegister ? '/register' : '/login';
+            // Simulação de delay para sentir a UX
+            await new Promise(r => setTimeout(r, 800));
+
+            const res = await axios.post(`${API_URL}${endpoint}`, { email, password });
+
+            if (res.data.success) {
+                onLogin(isRegister ? res.data.client : { id: res.data.clientId, email });
+            }
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data?.error || 'Falha ao conectar ao servidor. Verifique se o Backend está rodando.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+
+            {/* Background Decorativo */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+                <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-orange-600/20 rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-[10%] right-[5%] w-[30%] h-[30%] bg-blue-600/20 rounded-full blur-[100px]"></div>
+            </div>
+
+            <div className="glass-panel w-full max-w-md p-8 rounded-2xl shadow-2xl z-10 relative border-t border-white/10">
+                <div className="text-center mb-8">
+                    <div className="inline-flex p-4 rounded-xl bg-orange-500 text-white shadow-lg mb-4 transform hover:scale-110 transition-transform">
+                        <LayoutDashboard size={32} />
+                    </div>
+                    <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">ShopeeBot <span className="text-orange-500">SaaS</span></h1>
+                    <p className="text-slate-400 font-light">
+                        {isRegister ? 'Comece a lucrar no piloto automático.' : 'Bem-vindo de volta, afiliado.'}
+                    </p>
+                </div>
+
+                {error && (
+                    <div className="bg-red-500/10 border border-red-500/50 text-red-200 p-4 rounded-xl mb-6 text-sm flex items-center animate-pulse">
+                        ⚠️ {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="relative group">
+                        <Mail className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-orange-500 transition-colors" size={20} />
+                        <input
+                            type="email"
+                            required
+                            placeholder="Seu E-mail"
+                            className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3.5 pl-12 text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-slate-600"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        />
+                    </div>
+                    <div className="relative group">
+                        <Lock className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-orange-500 transition-colors" size={20} />
+                        <input
+                            type="password"
+                            required
+                            placeholder="Sua Senha Secreta"
+                            className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3.5 pl-12 text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-slate-600"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                        />
+                    </div>
+
+                    <button
+                        disabled={loading}
+                        className="w-full btn-primary text-white font-bold p-4 rounded-xl mt-2 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                        {loading ? <Loader2 className="animate-spin" /> : (isRegister ? 'Criar Minha Conta Grátis' : 'Acessar Painel')}
+                        {!loading && <ArrowRight size={18} />}
+                    </button>
+                </form>
+
+                <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+                    <p className="text-slate-500 text-sm">
+                        {isRegister ? 'Já possui cadastro? ' : 'Novo por aqui? '}
+                        <button onClick={() => setIsRegister(!isRegister)} className="text-orange-500 font-semibold hover:text-orange-400 transition ml-1">
+                            {isRegister ? 'Fazer Login' : 'Criar Conta'}
+                        </button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
