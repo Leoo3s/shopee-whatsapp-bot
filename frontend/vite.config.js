@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
     plugins: [react()],
-    define: {
-        global: 'window',
-    },
     resolve: {
         alias: {
             debug: path.resolve(__dirname, 'src/lib/debug-mock.js')
