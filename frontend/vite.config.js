@@ -1,15 +1,10 @@
-import path from "path";
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// Configuração padrão para Produção/Nuvem
 export default defineConfig({
     plugins: [react()],
-    resolve: {
-        alias: {
-            debug: path.resolve(__dirname, 'src/lib/debug-mock.js')
-        }
-    },
-    css: {
-        postcss: './postcss.config.js',
+    server: {
+        port: 5173
     }
 });
