@@ -3,9 +3,16 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ShopeeBot SaaS</title>
+  <script>
+    // FIX para erro "Cannot destructure property 'Request' of 'undefined'"
+    window.global = window;
+    window.process = { env: {} };
+    if (!window.Request) { window.Request = class { }; }
+    if (!window.Response) { window.Response = class { }; }
+    if (!window.Headers) { window.Headers = class { }; }
+  </script>
 </head>
 
 <body>
