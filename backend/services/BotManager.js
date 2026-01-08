@@ -185,8 +185,12 @@ class BotManager {
                             .replace(/{preco}/g, freshProduct.price)
                             .replace(/{link}/g, freshProduct.offerLink);
                     } else {
-                        // Padrão do sistema
-                        message = `🛍️ *PROMOÇÃO DO DIA!* 🛍️\n\n*${freshProduct.productName}*\n💰 R$ ${freshProduct.price}\n\n👉 Confira aqui: ${freshProduct.offerLink}`;
+                        // Padrão do sistema premium
+                        message = `🔥 *OFERTA IMPERDÍVEL!* 🔥\n\n` +
+                            `📦 *${freshProduct.productName}*\n\n` +
+                            `😱 *Por apenas:* R$ ${freshProduct.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n\n` +
+                            `🛒 *Garanta o seu aqui:* ${freshProduct.offerLink}\n\n` +
+                            `⚠️ _Válido enquanto durarem os estoques!_`;
                     }
 
                     // Envio para o WhatsApp

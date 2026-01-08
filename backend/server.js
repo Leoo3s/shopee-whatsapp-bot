@@ -2,7 +2,8 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
-const { Client } = require('./models/Client');
+const bcrypt = require('bcryptjs');
+const Client = require('./models/Client');
 const BotManager = require('./services/BotManager');
 
 /**
@@ -28,7 +29,9 @@ const botManager = new BotManager(io);
 app.post('/api/register', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const client = await Client.create({ email, password });
+        // Hash da senha antes de salvar
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const client = await Client.create({ email, password: hashedPassword });
         res.json({ success: true, clientId: client.id });
     } catch (e) { res.status(400).json({ error: "E-mail já cadastrado ou dados inválidos." }); }
 });
@@ -37,9 +40,13 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        const client = await Client.findOne({ where: { email, password } });
-        if (client) res.json({ success: true, clientId: client.id });
-        else res.status(401).json({ error: 'Credenciais incorretas.' });
+        const client = await Client.findOne({ where: { email } });
+
+        if (client && await bcrypt.compare(password, client.password)) {
+            res.json({ success: true, clientId: client.id });
+        } else {
+            res.status(401).json({ error: 'Credenciais incorretas.' });
+        }
     } catch (e) { res.status(500).json({ error: 'Erro interno no servidor.' }); }
 });
 

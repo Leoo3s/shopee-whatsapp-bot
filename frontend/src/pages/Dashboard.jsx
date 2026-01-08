@@ -139,6 +139,19 @@ export default function Dashboard({ user, onLogout }) {
         catch (e) { setLoadingGroups(false); }
     };
 
+    const handleUpgradePlan = async (planName) => {
+        const confirmMsg = `Você deseja mudar para o ${planName}? Esta é uma simulação de pagamento.`;
+        if (window.confirm(confirmMsg)) {
+            try {
+                const planKey = planName.toLowerCase().includes('pro') ? 'pro' :
+                    planName.toLowerCase().includes('max') ? 'enterprise' : 'free';
+                await axios.post(`${API_URL}/config/${user.id}`, { ...config, plan: planKey });
+                alert('🚀 Plano atualizado com sucesso! (Simulação)');
+                fetchUserConfig();
+            } catch (e) { alert('Erro ao atualizar plano.'); }
+        }
+    };
+
     // 3. UI RENDER
     return (
         <div className="flex min-h-screen bg-[#f8fafc]">
@@ -398,10 +411,37 @@ export default function Dashboard({ user, onLogout }) {
 
                 {/* ABA 4: PLANOS & ASSINATURA */}
                 {activeTab === 'plans' && (
-                    <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 text-center">
-                        <Header title="Pronto para Escalar?" desc="Escolha o plano ideal para suas vendas atingirem o próximo nível." center />
+                    <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+                        <div className="text-center mb-12">
+                            <Header title="Gestão de Assinatura" desc="Acompanhe seu status e potencialize suas vendas." center />
+                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                        {/* INFO DO PLANO ATUAL */}
+                        <div className="bg-white border-2 border-slate-100 rounded-[32px] p-10 mb-12 shadow-sm flex flex-col md:flex-row items-center gap-10">
+                            <div className="w-20 h-20 bg-orange-50 rounded-2xl flex items-center justify-center text-[#ee4d2d]">
+                                <Crown size={40} />
+                            </div>
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                                    Seu Plano: <span className="text-[#ee4d2d]">{config.plan === 'free' ? 'Plano Start (Trial)' : config.plan === 'pro' ? 'Plano Pro' : 'Plano Max'}</span>
+                                </h3>
+                                <p className="text-slate-500 mt-1 font-medium italic">
+                                    {config.plan === 'free' ? `Seu período de teste termina em: ${new Date(config.trialEndDate).toLocaleDateString('pt-BR')}` : 'Sua assinatura está ativa e renova automaticamente.'}
+                                </p>
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="px-6 py-3 bg-slate-50 rounded-xl border border-slate-100">
+                                    <p className="text-[10px] font-black uppercase text-slate-400">Ofertas Restantes Hoje</p>
+                                    <p className="text-lg font-black text-slate-700">{config.plan === 'free' ? 20 - (config.offersToday || 0) : config.plan === 'pro' ? 100 - (config.offersToday || 0) : 'Ilimitadas'}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-center mb-10">
+                            <h4 className="text-sm font-black text-slate-400 uppercase tracking-[0.2em]">Mudar de Plano</h4>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <PricingCard
                                 name="Plano Start"
                                 price="R$ 49,90"
@@ -413,6 +453,7 @@ export default function Dashboard({ user, onLogout }) {
                                     "Busca por Keywords",
                                     "Template Padrão"
                                 ]}
+                                onSelect={() => handleUpgradePlan('Plano Start')}
                                 current={config.plan === 'free'}
                             />
                             <PricingCard
@@ -427,6 +468,7 @@ export default function Dashboard({ user, onLogout }) {
                                     "Frequência de 1 Minuto",
                                     "Suporte VIP"
                                 ]}
+                                onSelect={() => handleUpgradePlan('Plano Pro')}
                                 current={config.plan === 'pro'}
                             />
                             <PricingCard
@@ -440,6 +482,7 @@ export default function Dashboard({ user, onLogout }) {
                                     "Dashboard de Vendas",
                                     "Full Personalização"
                                 ]}
+                                onSelect={() => handleUpgradePlan('Plano Max')}
                                 current={config.plan === 'enterprise'}
                             />
                         </div>
@@ -521,7 +564,7 @@ const Step = ({ number, title, desc }) => (
     </div>
 )
 
-const PricingCard = ({ name, price, period, features, popular, current }) => (
+const PricingCard = ({ name, price, period, features, popular, current, onSelect }) => (
     <div className={`bg-white border-2 rounded-[40px] p-10 flex flex-col relative transition-all duration-500 overflow-hidden ${popular ? 'border-[#ee4d2d] shadow-2xl shadow-orange-100 scale-105 z-10' : 'border-slate-100 hover:border-slate-200'}`}>
         {popular && <div className="absolute top-0 right-0 bg-[#ee4d2d] text-white px-5 py-2 text-[10px] font-black uppercase rounded-bl-3xl tracking-widest">Mais Popular</div>}
 
@@ -540,9 +583,9 @@ const PricingCard = ({ name, price, period, features, popular, current }) => (
         </ul>
 
         {current ? (
-            <div className="w-full py-4 rounded-2xl bg-slate-100 text-slate-400 font-black uppercase text-xs tracking-widest">Plano Atual</div>
+            <div className="w-full py-4 rounded-2xl bg-slate-100 text-slate-400 font-black uppercase text-xs tracking-widest text-center">Plano Atual</div>
         ) : (
-            <button className={`w-full py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all ${popular ? 'bg-[#ee4d2d] text-white shadow-lg shadow-orange-200 hover:scale-[1.03]' : 'bg-slate-800 text-white hover:bg-slate-900'}`}>
+            <button onClick={onSelect} className={`w-full py-4 rounded-2xl font-black uppercase text-xs tracking-widest transition-all ${popular ? 'bg-[#ee4d2d] text-white shadow-lg shadow-orange-200 hover:scale-[1.03]' : 'bg-slate-800 text-white hover:bg-slate-900'}`}>
                 Assinar Agora
             </button>
         )}
