@@ -3,7 +3,8 @@ import axios from 'axios';
 import { LayoutDashboard, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
 
 // URL do Backend
-const API_URL = 'http://localhost:3001/api';
+const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
+const API_URL = import.meta.env.VITE_API_URL || `${KOYEB_URL}/api`;
 
 // Carregamento Preguiçoso do Dashboard
 const Dashboard = lazy(() => import('./pages/Dashboard'));
