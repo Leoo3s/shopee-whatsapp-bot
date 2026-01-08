@@ -33,7 +33,12 @@ app.post('/api/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const client = await Client.create({ email, password: hashedPassword });
         res.json({ success: true, clientId: client.id });
-    } catch (e) { res.status(400).json({ error: "E-mail já cadastrado ou dados inválidos." }); }
+    } catch (e) {
+        if (e.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({ error: "Este e-mail já está em uso. Tente fazer login." });
+        }
+        res.status(400).json({ error: "Erro ao criar conta. Verifique os dados." });
+    }
 });
 
 // Login do Painel
