@@ -164,9 +164,6 @@ export default function Dashboard({ user, onLogout }) {
                     <h1 className="text-2xl font-black text-slate-800 tracking-tighter">
                         Shopee<span className="text-[#ee4d2d]">Flow</span>
                     </h1>
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-orange-50 text-[#ee4d2d] rounded-md text-[10px] font-bold uppercase tracking-wider border border-orange-100">
-                        SaaS Edition
-                    </div>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-1">
