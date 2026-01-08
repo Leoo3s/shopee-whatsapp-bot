@@ -49,6 +49,7 @@ export default function App() {
 function LoginScreen({ onLogin, isRegister, setIsRegister }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -57,11 +58,15 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
         setLoading(true);
         setError('');
 
+        // Validação de confirmação de senha
+        if (isRegister && password !== confirmPassword) {
+            setError('As senhas não coincidem. Tente novamente.');
+            setLoading(false);
+            return;
+        }
+
         try {
             const endpoint = isRegister ? '/register' : '/login';
-            // Simulação de delay para sentir a UX
-            await new Promise(r => setTimeout(r, 800));
-
             const res = await axios.post(`${API_URL}${endpoint}`, { email, password });
 
             if (res.data.success) {
@@ -124,6 +129,20 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
                             onChange={e => setPassword(e.target.value)}
                         />
                     </div>
+
+                    {isRegister && (
+                        <div className="relative group animate-in slide-in-from-top-2">
+                            <Lock className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-orange-500 transition-colors" size={20} />
+                            <input
+                                type="password"
+                                required
+                                placeholder="Confirme sua Senha"
+                                className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3.5 pl-12 text-white focus:ring-2 focus:ring-orange-500 outline-none transition-all placeholder:text-slate-600"
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                            />
+                        </div>
+                    )}
 
                     <button
                         disabled={loading}

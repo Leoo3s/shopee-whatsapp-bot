@@ -3,7 +3,7 @@ const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const bcrypt = require('bcryptjs');
-const Client = require('./models/Client');
+const { Client } = require('./models/Client');
 const BotManager = require('./services/BotManager');
 
 /**
