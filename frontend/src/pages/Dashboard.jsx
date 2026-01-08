@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 import {
     Rocket, Settings, LogOut, Smartphone, QrCode, Save,
     CheckCircle2, RefreshCw, Users, Zap, List, MessageSquare,
-    Crown, ShieldCheck, Check, Clock, Play, Pause
+    Crown, ShieldCheck, Check, Clock, Play, Pause, Moon
 } from 'lucide-react';
 
 const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
@@ -31,8 +31,10 @@ export default function Dashboard({ user, onLogout }) {
         customTemplate: '',
         plan: 'free',
         offersToday: 0,
-        searchInterval: 300000, // 5 min padrão
-        isPaused: false
+        searchInterval: 300000,
+        isPaused: false,
+        startTime: '00:00',
+        endTime: '23:59'
     });
 
     // Estados de Controle do Bot
