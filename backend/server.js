@@ -13,6 +13,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Rota de teste para confirmar que o servidor está vivo
+app.get('/', (req, res) => {
+    res.send('🚀 SaaS ShopeeBot Backend - ONLINE');
+});
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 const botManager = new BotManager(io);

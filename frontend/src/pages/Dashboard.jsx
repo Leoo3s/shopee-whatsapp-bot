@@ -7,8 +7,9 @@ import {
     Crown, ShieldCheck, Check, Clock, Play, Pause
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
+const API_URL = import.meta.env.VITE_API_URL || `${KOYEB_URL}/api`;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || KOYEB_URL;
 
 const socket = io(SOCKET_URL, {
     autoConnect: false,
