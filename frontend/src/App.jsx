@@ -70,7 +70,15 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
             const res = await axios.post(`${API_URL}${endpoint}`, { email, password });
 
             if (res.data.success) {
-                onLogin(isRegister ? res.data.client : { id: res.data.clientId, email });
+                if (isRegister) {
+                    alert('🎉 Conta criada com sucesso! Faça login para continuar.');
+                    setIsRegister(false); // Volta para tela de login
+                    setEmail(''); // Limpa campos
+                    setPassword('');
+                    setConfirmPassword('');
+                } else {
+                    onLogin({ id: res.data.clientId, email });
+                }
             }
         } catch (err) {
             console.error(err);
