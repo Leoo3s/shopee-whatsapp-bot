@@ -83,7 +83,7 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
                         setIsRegister(false);
                     }, 5000);
                 } else {
-                    onLogin({ id: res.data.clientId, email });
+                    onLogin({ id: res.data.clientId, email, isAdmin: res.data.isAdmin });
                 }
             }
         } catch (err) {

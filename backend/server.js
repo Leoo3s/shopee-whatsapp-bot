@@ -52,7 +52,10 @@ app.post('/api/login', async (req, res) => {
         } else {
             res.status(401).json({ error: 'Credenciais incorretas.' });
         }
-    } catch (e) { res.status(500).json({ error: 'Erro interno no servidor.' }); }
+    } catch (e) {
+        console.error('[LOGIN-ERROR]', e);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
 });
 
 // --- ROTAS ADMINISTRATIVAS (DONO DO APP) ---
@@ -105,16 +108,22 @@ app.post('/api/config/:clientId', async (req, res) => {
             startTime, endTime
         } = req.body;
 
+        console.log(`[API] POST /api/config/${req.params.clientId} - Saving client configuration`); // Added logging
         await Client.update(
             { shopeeAppId, shopeeAppSecret, whatsappGroupId, keywords, messageMode, customTemplate, searchInterval, startTime, endTime },
             { where: { id: req.params.clientId } }
         );
+        console.log(`[API] POST /api/config/${req.params.clientId} - Configuration saved successfully`); // Added logging
         res.json({ success: true });
-    } catch (e) { res.status(500).json({ error: 'Erro ao salvar configurações.' }); }
+    } catch (e) {
+        console.error(`[API-ERROR] POST /api/config/${req.params.clientId} - Error: ${e.message}`); // Added logging
+        res.status(500).json({ error: 'Erro ao salvar configurações.' });
+    }
 });
 
 // Controle de Ligar/Desligar Robô
 app.post('/api/start/:clientId', async (req, res) => {
+    console.log(`[API] POST /api/start/${req.params.clientId} - Attempting to start bot`); // Added logging
     const client = await Client.findByPk(req.params.clientId);
     botManager.startBot(client);
     res.json({ success: true });
