@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, Lock, Mail, ArrowRight, Loader2, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Lock, Mail, ArrowRight, Loader2, ShoppingBag, CheckCircle2, Activity } from 'lucide-react';
 
 // URL do Backend
 const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
@@ -52,6 +52,7 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState(''); // Novo estado para aviso no site
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -71,11 +72,16 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
 
             if (res.data.success) {
                 if (isRegister) {
-                    alert('🎉 Conta criada com sucesso! Faça login para continuar.');
-                    setIsRegister(false); // Volta para tela de login
-                    setEmail(''); // Limpa campos
+                    setSuccess('🎉 Conta criada com sucesso! Faça login abaixo.');
+                    setEmail('');
                     setPassword('');
                     setConfirmPassword('');
+
+                    // Aguarda 5 segundos para o usuário ler e depois volta pro login
+                    setTimeout(() => {
+                        setSuccess('');
+                        setIsRegister(false);
+                    }, 5000);
                 } else {
                     onLogin({ id: res.data.clientId, email });
                 }
@@ -103,14 +109,22 @@ function LoginScreen({ onLogin, isRegister, setIsRegister }) {
                         <ShoppingBag size={32} />
                     </div>
                     <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Shopee<span className="text-orange-500">Flow</span></h1>
-                    <p className="text-slate-400 font-light">
+                    <p className="text-slate-400 font-light text-sm">
                         {isRegister ? 'Comece a lucrar no piloto automático.' : 'Bem-vindo de volta, afiliado.'}
                     </p>
                 </div>
 
+                {success && (
+                    <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3 text-green-400 text-sm animate-in fade-in zoom-in-95">
+                        <CheckCircle2 size={20} />
+                        <span className="font-bold">{success}</span>
+                    </div>
+                )}
+
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/50 text-red-200 p-4 rounded-xl mb-6 text-sm flex items-center animate-pulse">
-                        ⚠️ {error}
+                    <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-400 text-sm animate-in fade-in zoom-in-95">
+                        <Activity size={20} />
+                        <span className="font-bold">{error}</span>
                     </div>
                 )}
 
