@@ -48,11 +48,44 @@ app.post('/api/login', async (req, res) => {
         const client = await Client.findOne({ where: { email } });
 
         if (client && await bcrypt.compare(password, client.password)) {
-            res.json({ success: true, clientId: client.id });
+            res.json({ success: true, clientId: client.id, isAdmin: client.isAdmin });
         } else {
             res.status(401).json({ error: 'Credenciais incorretas.' });
         }
     } catch (e) { res.status(500).json({ error: 'Erro interno no servidor.' }); }
+});
+
+// --- ROTAS ADMINISTRATIVAS (DONO DO APP) ---
+
+// Promover usuário a ADMIN (Use no navegador com seu email)
+app.get('/api/admin/promo/:email', async (req, res) => {
+    try {
+        const client = await Client.findOne({ where: { email: req.params.email } });
+        if (client) {
+            await client.update({ isAdmin: true, plan: 'enterprise' });
+            res.send(`🏆 ${req.params.email} agora é ADMINISTRADOR!`);
+        } else res.status(404).send("Usuário não encontrado.");
+    } catch (e) { res.status(500).send("Erro ao promover."); }
+});
+
+// Estatísticas Globais
+app.get('/api/admin/stats', async (req, res) => {
+    try {
+        const totalUsers = await Client.count();
+        const totalOffers = await Client.sum('offersToday');
+        const activeUsers = await Client.count({ where: { isPaused: false } });
+        res.json({ totalUsers, totalOffers, activeUsers });
+    } catch (e) { res.status(500).json({ error: 'Erro ao buscar stats' }); }
+});
+
+// Lista de Usuários do Sistema
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const users = await Client.findAll({
+            attributes: ['id', 'email', 'plan', 'offersToday', 'createdAt', 'isPaused']
+        });
+        res.json(users);
+    } catch (e) { res.status(500).json({ error: 'Erro ao buscar usuários' }); }
 });
 
 // Busca Configurações (Garante que Keywords e Templates voltem para o Front)

@@ -95,6 +95,10 @@ const Client = sequelize.define('Client', {
     endTime: {
         type: DataTypes.STRING,
         defaultValue: '23:59'
+    },
+    isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 });
 
@@ -111,7 +115,8 @@ sequelize.sync().then(async () => {
         { name: 'trialEndDate', type: 'DATETIME' },
         { name: 'isPaused', type: 'BOOLEAN DEFAULT false' },
         { name: 'startTime', type: 'STRING DEFAULT "00:00"' },
-        { name: 'endTime', type: 'STRING DEFAULT "23:59"' }
+        { name: 'endTime', type: 'STRING DEFAULT "23:59"' },
+        { name: 'isAdmin', type: 'BOOLEAN DEFAULT false' }
     ];
 
     for (const col of columns) {

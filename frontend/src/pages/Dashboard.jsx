@@ -4,7 +4,8 @@ import { io } from 'socket.io-client';
 import {
     Rocket, Settings, LogOut, Smartphone, QrCode, Save,
     CheckCircle2, RefreshCw, Users, Zap, List, MessageSquare,
-    Crown, ShieldCheck, Check, Clock, Play, Pause, Moon, ShoppingBag
+    Crown, ShieldCheck, Check, Clock, Play, Pause, Moon, ShoppingBag,
+    Menu, X, BarChart3, Activity
 } from 'lucide-react';
 
 const KOYEB_URL = 'https://innocent-rici-1leo3s-0914f4ce.koyeb.app';
@@ -42,6 +43,11 @@ export default function Dashboard({ user, onLogout }) {
     const [qrCode, setQrCode] = useState(null);
     const [availableGroups, setAvailableGroups] = useState([]);
     const [loadingGroups, setLoadingGroups] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Responsividade
+
+    // Estados Admin
+    const [adminStats, setAdminStats] = useState(null);
+    const [adminUsers, setAdminUsers] = useState([]);
 
     const isConnected = botStatus === 'connected';
     const isWaitingQr = botStatus === 'qrcode';
@@ -87,11 +93,26 @@ export default function Dashboard({ user, onLogout }) {
         try {
             const res = await axios.get(`${API_URL}/config/${user.id}`);
             if (res.data) {
-                // Mescla os dados do banco com o estado inicial para não perder campos novos
                 setConfig(prev => ({ ...prev, ...res.data }));
             }
         } catch (e) { console.error("Erro ao carregar configurações."); }
     };
+
+    const fetchAdminData = async () => {
+        if (!user.isAdmin) return;
+        try {
+            const [s, u] = await Promise.all([
+                axios.get(`${API_URL}/admin/stats`),
+                axios.get(`${API_URL}/admin/users`)
+            ]);
+            setAdminStats(s.data);
+            setAdminUsers(u.data);
+        } catch (e) { console.error("Erro admin."); }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'admin') fetchAdminData();
+    }, [activeTab]);
 
     // 2. AÇÕES DO USUÁRIO
     const handleTogglePause = async () => {
@@ -154,10 +175,19 @@ export default function Dashboard({ user, onLogout }) {
 
     // 3. UI RENDER
     return (
-        <div className="flex min-h-screen bg-[#f8fafc]">
-            {/* SIDEBAR PREMIUM */}
-            <aside className="w-64 bg-white border-r border-slate-200 flex flex-col sticky top-0 h-screen z-10">
-                <div className="p-8 border-b border-slate-100 mb-6 text-center">
+        <div className="flex min-h-screen bg-[#f8fafc] flex-col md:flex-row">
+
+            {/* MOBILE HEADER */}
+            <div className="md:hidden bg-white p-4 border-b border-slate-200 flex justify-between items-center sticky top-0 z-50">
+                <h1 className="text-xl font-black text-slate-800 tracking-tighter">Shopee<span className="text-[#ee4d2d]">Flow</span></h1>
+                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-slate-500">
+                    {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+            </div>
+
+            {/* SIDEBAR RESPONSIVA */}
+            <aside className={`w-64 bg-white border-r border-slate-200 flex flex-col fixed md:sticky top-0 h-screen z-40 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+                <div className="p-8 border-b border-slate-100 mb-6 text-center hidden md:block">
                     <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#ee4d2d] shadow-sm">
                         <ShoppingBag size={40} />
                     </div>
@@ -166,11 +196,14 @@ export default function Dashboard({ user, onLogout }) {
                     </h1>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-1">
-                    <SidebarItem active={activeTab === 'connect'} onClick={() => setActiveTab('connect')} icon={<Smartphone size={20} />} label="Conexão" badge={isConnected ? "Online" : null} />
-                    <SidebarItem active={activeTab === 'config'} onClick={() => setActiveTab('config')} icon={<Settings size={20} />} label="Configuração" />
-                    <SidebarItem active={activeTab === 'status'} onClick={() => setActiveTab('status')} icon={<Rocket size={20} />} label="Dashboard" />
-                    <SidebarItem active={activeTab === 'plans'} onClick={() => setActiveTab('plans')} icon={<Crown size={20} />} label="Assinatura" highlight />
+                <nav className="flex-1 px-4 space-y-1 mt-10 md:mt-0">
+                    <SidebarItem active={activeTab === 'connect'} onClick={() => { setActiveTab('connect'); setIsSidebarOpen(false); }} icon={<Smartphone size={20} />} label="Conexão" badge={isConnected ? "Online" : null} />
+                    <SidebarItem active={activeTab === 'config'} onClick={() => { setActiveTab('config'); setIsSidebarOpen(false); }} icon={<Settings size={20} />} label="Configuração" />
+                    <SidebarItem active={activeTab === 'status'} onClick={() => { setActiveTab('status'); setIsSidebarOpen(false); }} icon={<Rocket size={20} />} label="Dashboard" />
+                    <SidebarItem active={activeTab === 'plans'} onClick={() => { setActiveTab('plans'); setIsSidebarOpen(false); }} icon={<Crown size={20} />} label="Assinatura" highlight />
+                    {user.isAdmin && (
+                        <SidebarItem active={activeTab === 'admin'} onClick={() => { setActiveTab('admin'); setIsSidebarOpen(false); }} icon={<BarChart3 size={20} />} label="Administração" />
+                    )}
                 </nav>
 
                 <div className="p-4 border-t border-slate-100">
@@ -185,6 +218,11 @@ export default function Dashboard({ user, onLogout }) {
                     </button>
                 </div>
             </aside>
+
+            {/* OVERLAY MOBILE */}
+            {isSidebarOpen && (
+                <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden" />
+            )}
 
             {/* CONTEÚDO DINÂMICO */}
             <main className="flex-1 p-8 md:p-12 overflow-y-auto">
@@ -489,6 +527,60 @@ export default function Dashboard({ user, onLogout }) {
                     </div>
                 )}
 
+                {/* ABA 5: ADMIN (NOVO) */}
+                {activeTab === 'admin' && user.isAdmin && (
+                    <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4">
+                        <Header title="Painel do Fundador" desc="Visão geral do crescimento da plataforma ShopeeFlow." />
+
+                        {adminStats && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                                <StatCard icon={<Users />} label="Usuários Totais" value={adminStats.totalUsers} />
+                                <StatCard icon={<Activity />} label="Bots Ativos" value={adminStats.activeUsers} color="text-green-500" />
+                                <StatCard icon={<Zap />} label="Ofertas Totais (Hoje)" value={adminStats.totalOffers || 0} color="text-orange-500" />
+                            </div>
+                        )}
+
+                        <div className="bg-white border border-slate-100 rounded-[32px] overflow-hidden shadow-sm">
+                            <div className="p-8 border-b border-slate-50 bg-slate-50/50">
+                                <h3 className="font-black text-slate-800 flex items-center gap-3 uppercase text-xs tracking-widest">
+                                    <List size={18} /> Gestão de Clientes
+                                </h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="bg-slate-50/50 border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                            <th className="px-8 py-5">E-mail</th>
+                                            <th className="px-8 py-5">Plano</th>
+                                            <th className="px-8 py-5">Uso Hoje</th>
+                                            <th className="px-8 py-5">Status</th>
+                                            <th className="px-8 py-5">Cadastro</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-50">
+                                        {adminUsers.map(u => (
+                                            <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-8 py-5 font-bold text-slate-700 text-sm">{u.email}</td>
+                                                <td className="px-8 py-5 uppercase text-[10px] font-black">
+                                                    <span className={`px-2 py-1 rounded ${u.plan === 'enterprise' ? 'bg-purple-100 text-purple-600' : u.plan === 'pro' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'}`}>
+                                                        {u.plan}
+                                                    </span>
+                                                </td>
+                                                <td className="px-8 py-5 text-sm font-medium text-slate-500">{u.offersToday} ofertas</td>
+                                                <td className="px-8 py-5">
+                                                    <span className={`w-2 h-2 rounded-full inline-block mr-2 ${u.isPaused ? 'bg-amber-400' : 'bg-green-500'}`}></span>
+                                                    <span className="text-xs font-bold text-slate-400 uppercase">{u.isPaused ? 'Pausado' : 'Ativo'}</span>
+                                                </td>
+                                                <td className="px-8 py-5 text-xs text-slate-400">{new Date(u.createdAt).toLocaleDateString()}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
             </main>
         </div>
     );
@@ -561,6 +653,18 @@ const Step = ({ number, title, desc }) => (
             <h4 className="font-bold text-slate-800 text-lg group-hover:text-[#ee4d2d] transition-colors">{title}</h4>
             <p className="text-slate-400 font-medium text-sm leading-relaxed">{desc}</p>
         </div>
+    </div>
+)
+
+const StatCard = ({ icon, label, value, color }) => (
+    <div className="bg-white border border-slate-100 rounded-[32px] p-8 shadow-sm">
+        <div className="flex items-center gap-4 mb-4">
+            <div className={`p-3 bg-slate-50 rounded-2xl ${color || 'text-slate-400'}`}>
+                {icon}
+            </div>
+            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+        </div>
+        <p className="text-3xl font-black text-slate-800">{value}</p>
     </div>
 )
 
