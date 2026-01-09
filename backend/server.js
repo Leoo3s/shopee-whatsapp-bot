@@ -34,10 +34,11 @@ app.post('/api/register', async (req, res) => {
         const client = await Client.create({ email, password: hashedPassword });
         res.json({ success: true, clientId: client.id });
     } catch (e) {
+        console.error('[REGISTER-ERROR]', e); // ISSO VAI ME MOSTRAR O ERRO REAL
         if (e.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({ error: "Este e-mail já está em uso. Tente fazer login." });
         }
-        res.status(400).json({ error: "Erro ao criar conta. Verifique os dados." });
+        res.status(400).json({ error: `Erro ao criar conta: ${e.message}` });
     }
 });
 
