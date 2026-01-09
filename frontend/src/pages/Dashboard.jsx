@@ -634,16 +634,6 @@ const TagLabel = ({ label }) => (
     <span className="px-3 py-1.5 bg-orange-50 text-[#ee4d2d] rounded-lg text-[11px] font-bold border border-orange-100">{label}</span>
 )
 
-const StatCard = ({ icon, label, value, color = "text-slate-800" }) => (
-    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-6 hover:shadow-md transition-shadow">
-        <div className="p-5 bg-slate-50 rounded-2xl text-slate-400">{icon}</div>
-        <div>
-            <p className="text-xs text-slate-400 uppercase font-black tracking-widest mb-1">{label}</p>
-            <p className={`text-2xl font-black ${color}`}>{value}</p>
-        </div>
-    </div>
-)
-
 const Step = ({ number, title, desc }) => (
     <div className="flex gap-4 p-6 rounded-[24px] bg-white border border-slate-100 hover:border-orange-200 transition-all group">
         <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 font-black text-xl flex items-center justify-center shrink-0 group-hover:bg-[#ee4d2d] group-hover:text-white transition-all duration-300">
