@@ -1,9 +1,23 @@
 const { Sequelize, DataTypes } = require('sequelize');
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: './database.sqlite',
-    logging: false
-});
+
+// Configuração de conexão flexível (Nuvem ou Local)
+const dbUrl = process.env.DATABASE_URL;
+const sequelize = dbUrl
+    ? new Sequelize(dbUrl, {
+        dialect: 'postgres',
+        logging: false,
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false // Necessário para a maioria dos bancos grátis (Supabase/Railway)
+            }
+        }
+    })
+    : new Sequelize({
+        dialect: 'sqlite',
+        storage: './database.sqlite',
+        logging: false
+    });
 
 /**
  * Modelo de Cliente SaaS
